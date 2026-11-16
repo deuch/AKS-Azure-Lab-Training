@@ -1,0 +1,26 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-labelledby='title'><title id='title'>Deployment -&gt; ReplicaSet -&gt; Pods</title><defs><marker id='arrow' viewBox='0 0 10 10' refX='10' refY='5' markerWidth='8' markerHeight='8' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#495057'/></marker></defs><rect width='1280' height='720' fill='white'/><g font-family='Segoe UI, Arial, sans-serif' fill='black'>
+<text x='40' y='58' font-size='32' font-weight='600'>Deployment -&gt; ReplicaSet -&gt; Pods</text>
+<text x='40' y='102' font-size='20' font-weight='400'>Management relationships: the API objects describe state; running controllers take action.</text>
+<rect x='40' y='180' width='325' height='155' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='58' y='219' font-size='24' font-weight='600'>Deployment: demo</text>
+<text x='58' y='257' font-size='20' font-weight='400'>Pod template + replicas: 2</text>
+<text x='58' y='287' font-size='20' font-weight='400'>Owns template rollouts</text>
+<rect x='475' y='180' width='325' height='155' fill='#E8DAEF' stroke='#5C2D91' stroke-width='2'/>
+<text x='493' y='219' font-size='24' font-weight='600'>ReplicaSet</text>
+<text x='493' y='257' font-size='20' font-weight='400'>One template revision</text>
+<text x='493' y='287' font-size='20' font-weight='400'>Maintains the Pod count</text>
+<rect x='910' y='130' width='330' height='125' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='928' y='169' font-size='24' font-weight='600'>Pod A</text>
+<text x='928' y='207' font-size='20' font-weight='400'>NGINX container :8080</text>
+<rect x='910' y='300' width='330' height='125' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='928' y='339' font-size='24' font-weight='600'>Pod B</text>
+<text x='928' y='377' font-size='20' font-weight='400'>NGINX container :8080</text>
+<line x1='365' y1='255' x2='475' y2='255' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<line x1='800' y1='225' x2='910' y2='195' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<line x1='800' y1='290' x2='910' y2='360' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<rect x='40' y='470' width='1200' height='155' fill='#FFF4CE' stroke='#F7630C' stroke-width='2'/>
+<text x='58' y='509' font-size='24' font-weight='600'>Reconciliation when one Pod is deleted</text>
+<text x='58' y='547' font-size='20' font-weight='400'>Declared: 2 Pods   |   Observed: 1 Pod   |   ReplicaSet controller creates a replacement</text>
+<text x='58' y='577' font-size='20' font-weight='400'>New Pod identity/IP; scheduler chooses a node; kubelet starts the container</text>
+<text x='40' y='685' font-size='20' font-weight='400'>Scaling changes the count; changing the Pod template creates a new ReplicaSet revision.</text>
+</g></svg>

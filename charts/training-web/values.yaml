@@ -1,0 +1,22 @@
+replicaCount: 2
+image:
+  repository: docker.io/nginxinc/nginx-unprivileged
+  tag: "1.31.7-alpine"
+  pullPolicy: IfNotPresent
+message: "Hello from Helm - version 1"
+service:
+  port: 80
+ingress:
+  enabled: true
+  className: traefik
+  host: helm.lab01.lab.test
+  tls:
+    enabled: false
+    secretName: ""
+resources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi

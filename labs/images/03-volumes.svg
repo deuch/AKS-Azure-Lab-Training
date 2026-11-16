@@ -1,0 +1,37 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-labelledby='title'><title id='title'>Volumes: a claim outlives a replacement Pod</title><defs><marker id='arrow' viewBox='0 0 10 10' refX='10' refY='5' markerWidth='8' markerHeight='8' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#495057'/></marker></defs><rect width='1280' height='720' fill='white'/><g font-family='Segoe UI, Arial, sans-serif' fill='black'>
+<text x='40' y='58' font-size='32' font-weight='600'>Volumes: a claim outlives a replacement Pod</text>
+<text x='40' y='102' font-size='20' font-weight='400'>Arrows show references and provisioning, not file data passing through API objects.</text>
+<rect x='40' y='155' width='300' height='155' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='58' y='194' font-size='24' font-weight='600'>Pod volume mount</text>
+<text x='58' y='232' font-size='20' font-weight='400'>Path inside the container</text>
+<text x='58' y='262' font-size='20' font-weight='400'>References claim demo-data</text>
+<rect x='450' y='155' width='330' height='155' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='468' y='194' font-size='24' font-weight='600'>PVC: demo-data</text>
+<text x='468' y='232' font-size='20' font-weight='400'>Namespaced storage request</text>
+<text x='468' y='262' font-size='20' font-weight='400'>Capacity + access mode</text>
+<rect x='890' y='155' width='350' height='155' fill='#E8DAEF' stroke='#5C2D91' stroke-width='2'/>
+<text x='908' y='194' font-size='24' font-weight='600'>PV</text>
+<text x='908' y='232' font-size='20' font-weight='400'>Cluster-scoped volume record</text>
+<text x='908' y='262' font-size='20' font-weight='400'>Bound to one claim</text>
+<line x1='340' y1='230' x2='450' y2='230' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<line x1='780' y1='230' x2='890' y2='230' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<rect x='40' y='420' width='350' height='185' fill='#FFF4CE' stroke='#F7630C' stroke-width='2'/>
+<text x='58' y='459' font-size='24' font-weight='600'>emptyDir comparison</text>
+<text x='58' y='497' font-size='20' font-weight='400'>Belongs to one Pod</text>
+<text x='58' y='527' font-size='20' font-weight='400'>Container restart: data stays</text>
+<text x='58' y='557' font-size='20' font-weight='400'>Pod replacement: data lost</text>
+<rect x='470' y='420' width='350' height='185' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='488' y='459' font-size='24' font-weight='600'>StorageClass + CSI</text>
+<text x='488' y='497' font-size='20' font-weight='400'>Provisioning policy + driver</text>
+<text x='488' y='527' font-size='20' font-weight='400'>Arrange create/attach/mount</text>
+<text x='488' y='557' font-size='20' font-weight='400'>Trainer validates the class</text>
+<rect x='900' y='420' width='340' height='185' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='918' y='459' font-size='24' font-weight='600'>Actual storage</text>
+<text x='918' y='497' font-size='20' font-weight='400'>Approved disk or NFS share</text>
+<text x='918' y='527' font-size='20' font-weight='400'>Pod mounts the backend</text>
+<text x='918' y='557' font-size='20' font-weight='400'>Delete/Retain needs care</text>
+<line x1='615' y1='310' x2='645' y2='420' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
+<line x1='820' y1='510' x2='900' y2='510' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
+<line x1='1065' y1='310' x2='1070' y2='420' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
+<text x='40' y='685' font-size='20' font-weight='400'>RWO = one node, not necessarily one Pod. Keep the same PVC to prove persistence across Pod replacement.</text>
+</g></svg>

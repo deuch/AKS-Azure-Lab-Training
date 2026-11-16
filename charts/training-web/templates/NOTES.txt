@@ -1,0 +1,11 @@
+Release {{ .Release.Name }} is installed in namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+Send a request with Host: {{ .Values.ingress.host }} to the shared Traefik IP.
+The ingress controller and its LoadBalancer Service must already exist.
+{{- else }}
+Use kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "training-web.name" . }} 8081:{{ .Values.service.port }}.
+{{- end }}
+
+Inspect the objects with:
+  kubectl -n {{ .Release.Namespace }} get deployment,service,ingress,configmap -l app.kubernetes.io/instance={{ .Release.Name }}

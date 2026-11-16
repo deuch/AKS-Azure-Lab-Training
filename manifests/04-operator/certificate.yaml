@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo-tls
+spec:
+  secretName: demo-tls
+  duration: 24h
+  renewBefore: 8h
+  subject:
+    organizations:
+      - Kubernetes Training
+  dnsNames:
+    - lab01.lab.test
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    name: lab-selfsigned
+    kind: Issuer
+    group: cert-manager.io

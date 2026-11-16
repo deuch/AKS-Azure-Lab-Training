@@ -1,0 +1,32 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-labelledby='title'><title id='title'>Preparation: the API is your control surface</title><defs><marker id='arrow' viewBox='0 0 10 10' refX='10' refY='5' markerWidth='8' markerHeight='8' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#495057'/></marker></defs><rect width='1280' height='720' fill='white'/><g font-family='Segoe UI, Arial, sans-serif' fill='black'>
+<text x='40' y='58' font-size='32' font-weight='600'>Preparation: the API is your control surface</text>
+<text x='40' y='102' font-size='20' font-weight='400'>Declare objects through the API; the cluster continues the work after kubectl exits.</text>
+<rect x='40' y='155' width='275' height='155' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='58' y='194' font-size='24' font-weight='600'>Your workstation</text>
+<text x='58' y='232' font-size='20' font-weight='400'>kubectl + kubeconfig</text>
+<text x='58' y='262' font-size='20' font-weight='400'>Manifest: desired state</text>
+<rect x='420' y='155' width='335' height='155' fill='#E8DAEF' stroke='#5C2D91' stroke-width='2'/>
+<text x='438' y='194' font-size='24' font-weight='600'>Kubernetes API</text>
+<text x='438' y='232' font-size='20' font-weight='400'>Validate + store objects</text>
+<text x='438' y='262' font-size='20' font-weight='400'>Expose spec and status</text>
+<rect x='860' y='155' width='380' height='155' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='878' y='194' font-size='24' font-weight='600'>Controllers + nodes</text>
+<text x='878' y='232' font-size='20' font-weight='400'>Observe and reconcile</text>
+<text x='878' y='262' font-size='20' font-weight='400'>Schedule and run Pods</text>
+<line x1='315' y1='230' x2='420' y2='230' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<line x1='755' y1='230' x2='860' y2='230' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<text x='45' y='374' font-size='24' font-weight='600'>Separate API scopes</text>
+<rect x='40' y='415' width='550' height='185' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='58' y='454' font-size='24' font-weight='600'>Namespace: lab01</text>
+<text x='58' y='492' font-size='20' font-weight='400'>Deployment, Pod, Service, ConfigMap</text>
+<text x='58' y='522' font-size='20' font-weight='400'>Secret, PVC, Ingress, Gateway, HTTPRoute</text>
+<text x='58' y='552' font-size='20' font-weight='400'>Naming scope, not dedicated worker nodes</text>
+<rect x='690' y='415' width='550' height='185' fill='#F3F2F1' stroke='#495057' stroke-width='2'/>
+<text x='708' y='454' font-size='24' font-weight='600'>Cluster-scoped resources</text>
+<text x='708' y='492' font-size='20' font-weight='400'>Nodes, PVs, StorageClasses, CRDs</text>
+<text x='708' y='522' font-size='20' font-weight='400'>IngressClass and GatewayClass</text>
+<text x='708' y='552' font-size='20' font-weight='400'>Shared; usually trainer-managed</text>
+<line x1='520' y1='310' x2='315' y2='415' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
+<line x1='650' y1='310' x2='965' y2='415' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
+<text x='40' y='685' font-size='20' font-weight='400'>Remember: correct cluster context first; a namespace alone does not provide tenant security.</text>
+</g></svg>
