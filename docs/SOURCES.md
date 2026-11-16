@@ -1,8 +1,10 @@
 # Sources and applicability
 
 Checked **2026-10-23**, using first-party Microsoft, Kubernetes, Traefik,
-cert-manager and Dell documentation. These links are for trainers to recheck
-before a session; a documentation statement is not a live-cluster test.
+cert-manager and Dell documentation; AKS storage and Jobs/CronJobs sources
+checked **2026-11-16**. Dell rows apply only when running on AKS on Azure Local.
+These links are for trainers to recheck before a session; a documentation
+statement is not a live-cluster test.
 
 | Source | What it establishes / limit |
 | --- | --- |
@@ -28,6 +30,11 @@ before a session; a documentation statement is not a live-cluster test.
 | [Dell PowerStore CSI](https://github.com/dell/csi-powerstore) | Driver purpose, transport dependencies and supported-protocol prerequisites; exact release matrix still required. |
 | [Dell PowerScale CSI](https://github.com/dell/csi-powerscale) | Driver purpose and node-to-array connectivity requirement; historical Isilon naming remains visible. |
 | [Kubernetes persistent volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) | RWO/RWX, binding, reclaim policy and lifecycle. RWO is single-node, not necessarily single-Pod. |
+| [AKS storage concepts](https://learn.microsoft.com/en-us/azure/aks/concepts-storage) | Built-in AKS classes: `managed-csi` (Standard SSD managed disk, LRS or ZRS on multi-zone clusters, expandable, `Delete`) and `azurefile-csi` (Standard Azure Files share, `Delete`). Azure Disk is single-node; use Azure Files for multi-node access. Used by the Volumes lab. |
+| [AKS CSI storage drivers](https://learn.microsoft.com/en-us/azure/aks/csi-storage-drivers) | Azure Disk/Files CSI drivers, enabling them with `az aks update --enable-disk-driver/--enable-file-driver`, per-node data-disk limits. |
+| [Azure Files CSI driver parameters](https://github.com/kubernetes-sigs/azurefile-csi-driver/blob/master/docs/driver-parameters.md) | Dynamic provisioning creates/reuses a storage account in the cluster resource group (tag `k8s-azure-created-by: azure`); SMB parameters and permissions. |
+| [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/) | Completions, parallelism, Indexed completion mode, `backoffLimit`, `activeDeadlineSeconds`, `ttlSecondsAfterFinished`, restart policies. Used by the Jobs lab. |
+| [Kubernetes CronJobs](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) | Schedule syntax, `timeZone` (stable since 1.27), concurrency policy, starting deadline, history limits, suspension, idempotency caveat. |
 | [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) | Environment refresh versus mounted projection; subPath caveat; base64 is not encryption. |
 | [Helm chart guide](https://helm.sh/docs/chart_template_guide/getting_started/) | Templates, values and release workflow for the learner-created chart. |
 | [Application image tag](https://hub.docker.com/r/nginxinc/nginx-unprivileged/tags?name=1.31.7-alpine) | Registry API confirmed the tag, 2026-10-19 update and Linux amd64/arm64 images; run behavior still needs the cluster rehearsal. |
@@ -55,6 +62,8 @@ Further reading for the refresher terminology:
   and [EndpointSlices](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/)
 - [StorageClasses](https://kubernetes.io/docs/concepts/storage/storage-classes/)
   and [volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
+- [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+  and [CronJobs](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
 - [Custom resources and controllers](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 - [Helm release storage](https://helm.sh/docs/topics/advanced/#storage-backends)
   and [cert-manager Certificate resources](https://cert-manager.io/docs/usage/certificate/)

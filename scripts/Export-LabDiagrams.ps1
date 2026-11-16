@@ -212,20 +212,31 @@ Export-Diagram '02-networking' 'Traffic flow is not the same as configuration' `
 
 Export-Diagram '03-volumes' 'Volumes: a claim outlives a replacement Pod' `
     'Arrows show references and provisioning, not file data passing through API objects.' {
-    Add-Card 40 155 300 155 'Pod volume mount' @('Path inside the container', 'References claim demo-data') 'Green'
-    Add-Card 450 155 330 155 'PVC: demo-data' @('Namespaced storage request', 'Capacity + access mode') 'Blue'
+    Add-Card 40 155 300 155 'Pod volume mount' @('Path inside the container', 'References a claim by name') 'Green'
+    Add-Card 450 155 330 155 'PVC' @('Namespaced storage request', 'demo-data: RWO disk', 'demo-shared-data: RWX share') 'Blue'
     Add-Card 890 155 350 155 'PV' @('Cluster-scoped volume record', 'Bound to one claim') 'Purple'
     Add-Arrow 340 230 450 230
     Add-Arrow 780 230 890 230
     Add-Card 40 420 350 185 'emptyDir comparison' @('Belongs to one Pod', 'Container restart: data stays', 'Pod replacement: data lost') 'Orange'
-    Add-Card 470 420 350 185 'StorageClass + CSI' @('Provisioning policy + driver', 'Arrange create/attach/mount', 'Trainer validates the class') 'Blue'
-    Add-Card 900 420 340 185 'Actual storage' @('Approved disk or NFS share', 'Pod mounts the backend', 'Delete/Retain needs care') 'Green'
+    Add-Card 470 420 350 185 'StorageClass + CSI' @('managed-csi: Azure Disk', 'azurefile-csi: Azure Files', 'Create/attach/mount storage') 'Blue'
+    Add-Card 900 420 340 185 'Actual Azure storage' @('Managed disk (RWO)', 'Azure Files share (RWX)', 'Delete policy removes it') 'Green'
     Add-Arrow 615 310 645 420 -Dashed
     Add-Arrow 820 510 900 510 -Dashed
     Add-Arrow 1065 310 1070 420 -Dashed
-} 'RWO = one node, not necessarily one Pod. Keep the same PVC to prove persistence across Pod replacement.'
+} 'RWO disk: one node at a time. RWX share: many nodes. Delete removes the Azure resource with the claim.'
 
-Export-Diagram '04-helm' 'Helm: package -> render -> install a release' `
+Export-Diagram '04-jobs' 'Jobs and CronJobs: run to completion' `
+    'Arrows show creation and ownership; controllers in the control plane create the objects.' {
+    Add-Card 40 155 330 185 'CronJob: report' @('Schedule: every minute', 'Forbid overlapping runs', 'Keeps the last 3 Jobs') 'Blue'
+    Add-Card 470 155 330 185 'Job (one per run)' @('completions + parallelism', 'backoffLimit: retries', 'Complete or Failed') 'Purple'
+    Add-Card 900 155 340 185 'Pods' @('restartPolicy: Never', 'Exit 0: Completed', 'Exit 1: retry, new Pod') 'Green'
+    Add-Arrow 370 245 470 245
+    Add-Arrow 800 245 900 245
+    Add-Card 40 430 700 185 'Lifecycle of a Job' @('Pod fails: new Pod after about 10 s, 20 s, 40 s ...', 'Too many failures: Failed (BackoffLimitExceeded)', 'Finished: kept for logs, then TTL or history cleanup') 'Orange'
+    Add-Card 820 430 420 185 'Deployment versus Job' @('Deployment: keep N running', 'Job: reach N completions', 'Exit 0: restart versus done') 'Gray'
+} 'Design tasks to be idempotent: retries and rare duplicate CronJob runs can repeat the work.'
+
+Export-Diagram '05-helm' 'Helm: package -> render -> install a release' `
     'Helm generates ordinary Kubernetes objects; it does not replace their controllers.' {
     Add-Card 40 155 325 185 'Chart + values' @('Templates and defaults', 'Message, replicas, hostname', 'Local inputs, not API types') 'Blue'
     Add-Card 475 155 325 185 'Rendered manifests' @('Deployment + ConfigMap', 'Service + Ingress', 'Inspect YAML before install') 'Purple'
@@ -235,7 +246,7 @@ Export-Diagram '04-helm' 'Helm: package -> render -> install a release' `
     Add-Card 40 450 1200 155 'Revision history in this exercise' @('Revision 1: version 1, two replicas   ->   Revision 2: version 2, three replicas', 'Rollback to 1 records revision 3: version 1, two replicas; it does not rewind application data') 'Gray'
 } 'A ConfigMap checksum changes the Pod template on upgrade. Release history can contain sensitive values.'
 
-Export-Diagram '04-operator' 'Operator example: declare a certificate, get a Secret' `
+Export-Diagram '05-operator' 'Operator example: declare a certificate, get a Secret' `
     'CRDs register types; a running controller performs and maintains the domain work.' {
     Add-Card 40 150 350 185 'CRDs + your resources' @('CRDs: register Issuer/Certificate', 'Issuer: how to sign', 'Certificate: desired DNS + key') 'Blue'
     Add-Card 485 150 350 185 'cert-manager' @('Controller reconciles resources', 'CertificateRequest: issuance', 'Renews/repairs the output') 'Purple'

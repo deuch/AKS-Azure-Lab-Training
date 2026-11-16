@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: demo-static-data
+  name: demo-shared-data
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: ""
-  volumeName: training-nfs-lab01
+  storageClassName: azurefile-csi
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi

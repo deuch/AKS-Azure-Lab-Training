@@ -1,0 +1,32 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='720' viewBox='0 0 1280 720' role='img' aria-labelledby='title'><title id='title'>Jobs and CronJobs: run to completion</title><defs><marker id='arrow' viewBox='0 0 10 10' refX='10' refY='5' markerWidth='8' markerHeight='8' orient='auto-start-reverse'><path d='M 0 0 L 10 5 L 0 10 z' fill='#495057'/></marker></defs><rect width='1280' height='720' fill='white'/><g font-family='Segoe UI, Arial, sans-serif' fill='black'>
+<text x='40' y='58' font-size='32' font-weight='600'>Jobs and CronJobs: run to completion</text>
+<text x='40' y='102' font-size='20' font-weight='400'>Arrows show creation and ownership; controllers in the control plane create the objects.</text>
+<rect x='40' y='155' width='330' height='185' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
+<text x='58' y='194' font-size='24' font-weight='600'>CronJob: report</text>
+<text x='58' y='232' font-size='20' font-weight='400'>Schedule: every minute</text>
+<text x='58' y='262' font-size='20' font-weight='400'>Forbid overlapping runs</text>
+<text x='58' y='292' font-size='20' font-weight='400'>Keeps the last 3 Jobs</text>
+<rect x='470' y='155' width='330' height='185' fill='#E8DAEF' stroke='#5C2D91' stroke-width='2'/>
+<text x='488' y='194' font-size='24' font-weight='600'>Job (one per run)</text>
+<text x='488' y='232' font-size='20' font-weight='400'>completions + parallelism</text>
+<text x='488' y='262' font-size='20' font-weight='400'>backoffLimit: retries</text>
+<text x='488' y='292' font-size='20' font-weight='400'>Complete or Failed</text>
+<rect x='900' y='155' width='340' height='185' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
+<text x='918' y='194' font-size='24' font-weight='600'>Pods</text>
+<text x='918' y='232' font-size='20' font-weight='400'>restartPolicy: Never</text>
+<text x='918' y='262' font-size='20' font-weight='400'>Exit 0: Completed</text>
+<text x='918' y='292' font-size='20' font-weight='400'>Exit 1: retry, new Pod</text>
+<line x1='370' y1='245' x2='470' y2='245' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<line x1='800' y1='245' x2='900' y2='245' stroke='#495057' stroke-width='2' marker-end='url(#arrow)'/>
+<rect x='40' y='430' width='700' height='185' fill='#FFF4CE' stroke='#F7630C' stroke-width='2'/>
+<text x='58' y='469' font-size='24' font-weight='600'>Lifecycle of a Job</text>
+<text x='58' y='507' font-size='20' font-weight='400'>Pod fails: new Pod after about 10 s, 20 s, 40 s ...</text>
+<text x='58' y='537' font-size='20' font-weight='400'>Too many failures: Failed (BackoffLimitExceeded)</text>
+<text x='58' y='567' font-size='20' font-weight='400'>Finished: kept for logs, then TTL or history cleanup</text>
+<rect x='820' y='430' width='420' height='185' fill='#F3F2F1' stroke='#495057' stroke-width='2'/>
+<text x='838' y='469' font-size='24' font-weight='600'>Deployment versus Job</text>
+<text x='838' y='507' font-size='20' font-weight='400'>Deployment: keep N running</text>
+<text x='838' y='537' font-size='20' font-weight='400'>Job: reach N completions</text>
+<text x='838' y='567' font-size='20' font-weight='400'>Exit 0: restart versus done</text>
+<text x='40' y='685' font-size='20' font-weight='400'>Design tasks to be idempotent: retries and rare duplicate CronJob runs can repeat the work.</text>
+</g></svg>

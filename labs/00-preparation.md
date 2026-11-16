@@ -7,7 +7,8 @@
 
 The trainer must complete [Instructor setup](../docs/INSTRUCTOR-SETUP.md), including
 the AKS/Azure Local version checks, shared controllers, reachable Traefik VIP and
-validated StorageClass. You need PowerShell 7.4+, Helm and a compatible `kubectl`.
+the `managed-csi`/`azurefile-csi` storage classes check. You need PowerShell 7.4+,
+Helm and a compatible `kubectl`.
 The cluster already exists; this lab does not provision AKS or install its CSI.
 
 Run every command from the **workshop root**, the folder containing
@@ -81,23 +82,26 @@ namespace explicitly; no global context namespace changes are needed.
 
 ## Set up your namespace and files
 
-Set your assigned namespace and the StorageClass supplied by the trainer:
+Set your assigned namespace. The storage classes default to the AKS built-in
+classes used by the Volumes lab:
 
 ```powershell
 $Namespace = 'lab01'                  # Every learner/pair uses a different name.
-$RwoStorageClass = '<approved-existing-RWO-class>'
+$RwoStorageClass = 'managed-csi'      # Azure Disk, ReadWriteOnce
+$RwxStorageClass = 'azurefile-csi'    # Azure Files, ReadWriteMany
 $LabHost = "$Namespace.lab.test"
 $HelmHost = "helm.$Namespace.lab.test"
 $LabFiles = ".\.work\$Namespace"
 
-.\scripts\New-LabWorkspace.ps1 -Namespace $Namespace -RwoStorageClass $RwoStorageClass
+.\scripts\New-LabWorkspace.ps1 -Namespace $Namespace -RwoStorageClass $RwoStorageClass -RwxStorageClass $RwxStorageClass
 kubectl create namespace $Namespace
 kubectl -n $Namespace get pods
 ```
 
-If namespaces are pre-created, skip `kubectl create namespace`. If the trainer
-also provides an RWX class, pass `-RwxStorageClass '<actual-class>'` to the helper
-when creating the workspace. The helper only copies/substitutes local YAML.
+If namespaces are pre-created, skip `kubectl create namespace`. Change the two
+storage class names only if the trainer tells you to; for example AKS on Azure
+Local does not provide `managed-csi`/`azurefile-csi`. The helper only
+copies/substitutes local YAML.
 
 **Do not apply the whole generated directory.** Follow the file-by-file sequence.
 The original examples use namespace/host `lab01`; generated examples are yours
@@ -125,7 +129,8 @@ describe a controller rather than a container.
 - Correct workload context and compatible client confirmed.
 - Your assigned namespace exists and is accessible.
 - Your generated manifests are in `.work\<your-namespace>`.
-- `$Namespace`, `$RwoStorageClass`, `$LabHost`, `$HelmHost` and `$LabFiles` are set.
+- `$Namespace`, `$RwoStorageClass`, `$RwxStorageClass`, `$LabHost`, `$HelmHost`
+  and `$LabFiles` are set.
 
 Leave the namespace in place for the next lab.
 

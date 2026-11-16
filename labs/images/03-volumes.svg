@@ -4,11 +4,12 @@
 <rect x='40' y='155' width='300' height='155' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
 <text x='58' y='194' font-size='24' font-weight='600'>Pod volume mount</text>
 <text x='58' y='232' font-size='20' font-weight='400'>Path inside the container</text>
-<text x='58' y='262' font-size='20' font-weight='400'>References claim demo-data</text>
+<text x='58' y='262' font-size='20' font-weight='400'>References a claim by name</text>
 <rect x='450' y='155' width='330' height='155' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
-<text x='468' y='194' font-size='24' font-weight='600'>PVC: demo-data</text>
+<text x='468' y='194' font-size='24' font-weight='600'>PVC</text>
 <text x='468' y='232' font-size='20' font-weight='400'>Namespaced storage request</text>
-<text x='468' y='262' font-size='20' font-weight='400'>Capacity + access mode</text>
+<text x='468' y='262' font-size='20' font-weight='400'>demo-data: RWO disk</text>
+<text x='468' y='292' font-size='20' font-weight='400'>demo-shared-data: RWX share</text>
 <rect x='890' y='155' width='350' height='155' fill='#E8DAEF' stroke='#5C2D91' stroke-width='2'/>
 <text x='908' y='194' font-size='24' font-weight='600'>PV</text>
 <text x='908' y='232' font-size='20' font-weight='400'>Cluster-scoped volume record</text>
@@ -22,16 +23,16 @@
 <text x='58' y='557' font-size='20' font-weight='400'>Pod replacement: data lost</text>
 <rect x='470' y='420' width='350' height='185' fill='#CFE4FA' stroke='#0078D4' stroke-width='2'/>
 <text x='488' y='459' font-size='24' font-weight='600'>StorageClass + CSI</text>
-<text x='488' y='497' font-size='20' font-weight='400'>Provisioning policy + driver</text>
-<text x='488' y='527' font-size='20' font-weight='400'>Arrange create/attach/mount</text>
-<text x='488' y='557' font-size='20' font-weight='400'>Trainer validates the class</text>
+<text x='488' y='497' font-size='20' font-weight='400'>managed-csi: Azure Disk</text>
+<text x='488' y='527' font-size='20' font-weight='400'>azurefile-csi: Azure Files</text>
+<text x='488' y='557' font-size='20' font-weight='400'>Create/attach/mount storage</text>
 <rect x='900' y='420' width='340' height='185' fill='#DFF6DD' stroke='#107C10' stroke-width='2'/>
-<text x='918' y='459' font-size='24' font-weight='600'>Actual storage</text>
-<text x='918' y='497' font-size='20' font-weight='400'>Approved disk or NFS share</text>
-<text x='918' y='527' font-size='20' font-weight='400'>Pod mounts the backend</text>
-<text x='918' y='557' font-size='20' font-weight='400'>Delete/Retain needs care</text>
+<text x='918' y='459' font-size='24' font-weight='600'>Actual Azure storage</text>
+<text x='918' y='497' font-size='20' font-weight='400'>Managed disk (RWO)</text>
+<text x='918' y='527' font-size='20' font-weight='400'>Azure Files share (RWX)</text>
+<text x='918' y='557' font-size='20' font-weight='400'>Delete policy removes it</text>
 <line x1='615' y1='310' x2='645' y2='420' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
 <line x1='820' y1='510' x2='900' y2='510' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
 <line x1='1065' y1='310' x2='1070' y2='420' stroke='#495057' stroke-width='2' stroke-dasharray='8 6' marker-end='url(#arrow)'/>
-<text x='40' y='685' font-size='20' font-weight='400'>RWO = one node, not necessarily one Pod. Keep the same PVC to prove persistence across Pod replacement.</text>
+<text x='40' y='685' font-size='20' font-weight='400'>RWO disk: one node at a time. RWX share: many nodes. Delete removes the Azure resource with the claim.</text>
 </g></svg>

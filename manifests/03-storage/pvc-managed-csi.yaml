@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: training-rwo
+  storageClassName: managed-csi
   resources:
     requests:
-      storage: 1Gi
+      storage: 4Gi

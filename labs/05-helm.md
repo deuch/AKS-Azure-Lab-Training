@@ -5,7 +5,7 @@ plus an optional 30-minute operator/CRD extension.
 **Prerequisites:** [Preparation](00-preparation.md) and
 [Service / Ingress / Gateway API](02-service-ingress-gatewayapi.md), including
 the shared Traefik controller and `$IngressIp`. In the full workshop, continue
-here after [Volumes](03-volumes.md).
+here after [Jobs and CronJobs](04-jobs-cronjobs.md).
 Run commands from the workshop root in the same PowerShell session.
 
 ## Goals
@@ -22,7 +22,7 @@ A **chart** contains templates and defaults. Helm combines these with your
 chosen values to render ordinary Kubernetes manifests, then installs or updates
 them as a tracked **release**.
 
-![Chart templates and values render Kubernetes manifests; a Helm release records revisions while Kubernetes controllers maintain the installed resources.](images/04-helm.png)
+![Chart templates and values render Kubernetes manifests; a Helm release records revisions while Kubernetes controllers maintain the installed resources.](images/05-helm.png)
 
 *Read the picture:* the chart and values are local files, not new Kubernetes
 resource types. The output is the Deployment, ConfigMap, Service and Ingress you
@@ -61,7 +61,7 @@ Installing a release does not automatically take ownership of existing
    revision. It does not reverse database changes, external side effects or
    arbitrary data writes.
 6. **Uninstall** removes release-managed resources according to Helm behavior.
-   Our raw PVC is not owned by this release; namespace deletion later removes it.
+   Our raw `demo-shared-data` PVC is not owned by this release; namespace deletion later removes it.
 
 **Docker bridge:** a chart can distribute a parameterized app configuration,
 but it is not a container image, Dockerfile or one-to-one Compose replacement.
@@ -168,7 +168,7 @@ versus Kubernetes spec, and why real secrets should not go into release values.
 - An upgrade changes replicas/content, and rollback restores both.
 - Your packaged chart is in `.work\<your-namespace>`.
 
-You have completed the five-topic core sequence. Continue with the optional
+You have completed the six-guide core sequence. Continue with the optional
 operator extension, or go to [Debrief and cleanup](#debrief-and-cleanup-10-minutes).
 
 ## Optional extension: operator and CRD with cert-manager (+30 minutes)
@@ -180,7 +180,7 @@ understand a domain. cert-manager understands certificate issuance and renewal.
 Helm installs the shared software; cert-manager then reconciles certificate
 resources even when no Helm command is running.
 
-![cert-manager CRDs register API types; Issuer and Certificate resources drive a controller that issues through CertificateRequests and maintains a TLS Secret consumed by Traefik.](images/04-operator.png)
+![cert-manager CRDs register API types; Issuer and Certificate resources drive a controller that issues through CertificateRequests and maintains a TLS Secret consumed by Traefik.](images/05-operator.png)
 
 *Read the picture:* these are configuration/reconciliation arrows, not a path
 through which browser requests travel. Traefik reads the TLS Secret for HTTPS;
@@ -238,9 +238,9 @@ The trainer can demonstrate the cluster-scoped reads if your role forbids them.
 ### B. Create a namespaced issuer and certificate
 
 ```powershell
-kubectl -n $Namespace apply -f "$LabFiles\04-operator\issuer.yaml"
+kubectl -n $Namespace apply -f "$LabFiles\05-operator\issuer.yaml"
 kubectl -n $Namespace wait --for=condition=Ready issuer/lab-selfsigned --timeout=120s
-kubectl -n $Namespace apply -f "$LabFiles\04-operator\certificate.yaml"
+kubectl -n $Namespace apply -f "$LabFiles\05-operator\certificate.yaml"
 kubectl -n $Namespace wait --for=condition=Ready certificate/demo-tls --timeout=120s
 kubectl -n $Namespace describe certificate demo-tls
 kubectl -n $Namespace get certificaterequest
@@ -277,7 +277,7 @@ The [networking lab](02-service-ingress-gatewayapi.md) restored Ingress and remo
 Gateway/HTTPRoute. Apply the HTTPS version:
 
 ```powershell
-kubectl -n $Namespace apply -f "$LabFiles\04-operator\ingress-tls.yaml"
+kubectl -n $Namespace apply -f "$LabFiles\05-operator\ingress-tls.yaml"
 kubectl -n $Namespace describe ingress demo
 curl.exe --fail --insecure --noproxy "*" --resolve "${LabHost}:443:${IngressIp}" "https://${LabHost}/"
 ```
@@ -299,22 +299,24 @@ after a CRD existed, and why cert issuance still requires a running controller.
 
 ## Debrief and cleanup (10 minutes)
 
-Before deletion, inspect your storage. Record the PV name/reclaim policy if you
-need the trainer to reclaim it. **Namespace deletion deletes your PVCs**, and
-`Delete` policy can destroy the corresponding backend storage.
+Before deletion, inspect what your namespace still contains. **Namespace deletion
+deletes your PVCs**, and the `Delete` reclaim policy of `managed-csi` and
+`azurefile-csi` then deletes the Azure disk or file share **with its data**.
 
 ```powershell
-kubectl -n $Namespace get deployment,service,ingress,pvc
+kubectl -n $Namespace get deployment,service,ingress,cronjob,job,pvc
 helm uninstall helm-web --namespace $Namespace
 kubectl delete namespace $Namespace
 ```
 
 Run namespace deletion only for your own assigned lab namespace after confirming
-the data is disposable. Stop port-forward terminals with Ctrl+C.
+the data is disposable. Stop port-forward terminals with Ctrl+C. Deleting the
+namespace also removes the suspended CronJob and any remaining Jobs.
 
-Do **not** uninstall Traefik, cert-manager, MetalLB or shared CRDs/classes.
-Do **not** delete every PV/StorageClass. Static NFS `Retain` PVs and exports need
-trainer-owned, targeted cleanup; deleting their PVCs does not remove NFS files.
+Do **not** uninstall Traefik, cert-manager, MetalLB or shared CRDs/classes, and do
+**not** delete StorageClasses or other learners' PVs. The storage account that
+the Azure Files driver created in the node resource group is shared and is
+reviewed by the trainer, not deleted by learners.
 
 ### Final knowledge check
 
@@ -324,12 +326,14 @@ trainer-owned, targeted cleanup; deleting their PVCs does not remove NFS files.
 4. What differs between `GatewayClass`, `Gateway` and `HTTPRoute`?
 5. When does a ConfigMap update need a restart?
 6. What survives Pod deletion, PVC deletion, or namespace deletion?
-7. Why does RWO not mean "exactly one Pod"?
-8. What does Helm track, and what does an operator reconcile?
-9. Is a base64-encoded Secret protected from someone authorized to read it?
-10. Why is a successful `curl --insecure` not proof of trusted TLS?
+7. Why does RWO not mean "exactly one Pod", and why did the shared web content need `azurefile-csi`?
+8. What happens when a Job's container exits with code 0, and when it keeps failing?
+9. Why should a CronJob's task be idempotent?
+10. What does Helm track, and what does an operator reconcile?
+11. Is a base64-encoded Secret protected from someone authorized to read it?
+12. Why is a successful `curl --insecure` not proof of trusted TLS?
 
-Questions 8 (operator comparison) and 10 can be used as trainer explanations if
+Questions 10 (operator comparison) and 12 can be used as trainer explanations if
 you skipped the optional extension.
 
 ### Troubleshooting ladder
@@ -348,8 +352,12 @@ you skipped the optional extension.
 | Gateway not Programmed | Class Accepted, listener/entry point, provider logs |
 | HTTPRoute not Accepted/ResolvedRefs | Parent listener, hostname, namespace permissions, backend |
 | PVC Pending | StorageClass, CSI events; WaitForFirstConsumer may be normal |
-| Volume permission denied | UID/GID 101, export ACL/root-squash and CSI fsGroup support |
+| Volume permission denied | UID/GID 101, Pod `fsGroup`, SMB mount options and CSI fsGroup support |
+| Disk attach slow or failing | VolumeAttachment, node data-disk limit, zone, Pod moved to another node |
+| Job never completes | Pod logs/exit code, `activeDeadlineSeconds`, `backoffLimit`, Pending Pods |
+| Job Failed: BackoffLimitExceeded | Logs of each failed Pod; a deterministic error is not fixed by retries |
+| CronJob creates no Jobs | `suspend`, schedule and `timeZone`, `startingDeadlineSeconds`, `concurrencyPolicy: Forbid` with an active Job |
 | Helm upgrade but unchanged content | Correct release/host, rendered values, config checksum and rollout |
 | Certificate not Ready | Issuer, webhook health, conditions, CertificateRequests and events |
 
-[Previous: Volumes](03-volumes.md) | [Lab index](../LAB-GUIDE.md)
+[Previous: Jobs and CronJobs](04-jobs-cronjobs.md) | [Lab index](../LAB-GUIDE.md)

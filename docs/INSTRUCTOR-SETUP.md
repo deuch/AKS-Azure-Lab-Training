@@ -15,8 +15,10 @@ Record:
 - Microsoft support confirmation for the exact release and reported Kubernetes
   1.36 version. The retrieved release notes list versions through 1.33 for the
   releases shown; they do not verify 1.36 on this platform.
-- Dell CSM/CSI release, its supported Kubernetes/OS matrix, PowerStore OS and
-  PowerScale OneFS versions, transport and storage-network reachability.
+- Storage: on AKS in Azure, the built-in `managed-csi`/`azurefile-csi` classes
+  (section 4). On Azure Local only: the Dell CSM/CSI release, its supported
+  Kubernetes/OS matrix, PowerStore OS and PowerScale OneFS versions, transport
+  and storage-network reachability.
 
 Use the **workload cluster**, not the Arc Resource Bridge management cluster.
 Check context before every administrator operation:
@@ -50,9 +52,10 @@ controllers. MetalLB extension deployment also needs appropriate Azure/Arc
 permissions, documented separately in the Microsoft how-to.
 
 Learners need namespace-scoped CRUD for Deployments, Services, ConfigMaps,
-Secrets, Ingresses, PVCs and the exercise's Gateway API/cert-manager resources;
-Pod logs, exec and port-forward; and read access to relevant events. The trainer
-can show cluster-scoped PV/StorageClass/CRD inventory if learners cannot list it.
+Secrets, Ingresses, PVCs, Jobs, CronJobs and the exercise's Gateway API/cert-manager
+resources; Pod logs, exec and port-forward; and read access to relevant events.
+The trainer can show cluster-scoped PV/VolumeAttachment/StorageClass/CRD
+inventory if learners cannot list it.
 Have the trainer pre-create namespaces if learners cannot create them.
 Use a training cluster or dedicated namespaces with quotas; never grant every
 learner cluster-admin merely to run this workshop.
@@ -217,60 +220,90 @@ Each learner with port-forward permission can start their own tunnel. This tests
 Traefik routing but **does not validate MetalLB, LAN reachability or external
 load balancing**. The core networking acceptance check must use the real VIP.
 
-## 4. Validate persistent storage, do not guess a Dell configuration
+## 4. Check the storage classes used by the Volumes lab
 
-Two separate questions:
+The [Volumes lab](../labs/03-volumes.md) uses the storage classes that **AKS in
+Azure** creates automatically when its Azure Disk and Azure Files CSI drivers are
+enabled (the default):
 
-1. **Infrastructure storage:** which SAN backs Azure Local CSVs and the AKS node
-   VM disks? That does not automatically expose a Dell CSI StorageClass to Pods.
-2. **Application storage:** which provisioner does the selected StorageClass
-   actually use? It may be the platform's existing CSI or a separately installed
-   Dell driver. Choose a supported path with the platform/storage team.
+| Class | Driver | Backend | Access | Binding | Reclaim |
+| --- | --- | --- | --- | --- | --- |
+| `managed-csi` | `disk.csi.azure.com` | Azure managed disk, Standard SSD | RWO | `WaitForFirstConsumer` | `Delete` |
+| `azurefile-csi` | `file.csi.azure.com` | Azure Files SMB share, Standard storage account | RWX | `Immediate` | `Delete` |
 
-For direct array-backed provisioning, review the Dell CSI for PowerStore and
-PowerScale documentation and support matrix. PowerScale's driver/provisioner
-may retain the historical `isilon` name. Do not identify a provisioner by product
-branding alone. Dell's documentation moved to Dell.com for CSM 1.17+.
-
-**PowerStore:** decide block versus file and the supported transport. VM workers
-do not automatically inherit the physical hosts' Fibre Channel HBAs. Confirm
-supported worker network paths and OS prerequisites for iSCSI, NVMe/TCP or NFS;
-do not instruct learners to install host packages on managed nodes.
-
-**PowerScale:** validate NFS exports, SmartConnect/DNS, access zones, export
-permissions, node network access, supported NFS version and user/group behavior.
-Root-squash and CSI `fsGroup` support can affect the app running as UID/GID 101.
-
-Required core class: writable filesystem PVC, **RWO**, **1Gi** or the site's
-minimum size. An optional **RWX** class enables the shared-file extension.
-The sample class names `training-rwo` and `training-rwx` are placeholders for
-**existing validated names**, not StorageClass installers.
-If the class requires more than 1Gi, update the example claim's requested size
-before the rehearsal and tell learners which size to use.
+Check them on the training cluster:
 
 ```powershell
-$RwoStorageClass = '<actual-approved-class>'
-kubectl get storageclass $RwoStorageClass -o yaml
-kubectl get csidriver
+kubectl get storageclass managed-csi azurefile-csi
+kubectl get storageclass managed-csi -o yaml
+kubectl get storageclass azurefile-csi -o yaml
+kubectl get csidriver disk.csi.azure.com file.csi.azure.com
 ```
 
-Inspect provisioner, parameters, `reclaimPolicy`, `volumeBindingMode` and
-`allowVolumeExpansion`. Review secrets only through approved procedures; do not
-copy array credentials into workshop materials. Do not alter the default class.
+If a class or driver is missing, the cluster administrator can check and enable
+the drivers. Replace the placeholders with the training cluster's values:
 
-Rehearse the [Volumes lab](../labs/03-volumes.md) using the actual class. Verify:
+```powershell
+az aks show --resource-group '<resource-group>' --name '<cluster-name>' --query storageProfile
+az aks update --resource-group '<resource-group>' --name '<cluster-name>' --enable-disk-driver --enable-file-driver
+```
 
-- A Pod schedules and the PVC becomes Bound. `WaitForFirstConsumer` may keep the
-  claim Pending until the Pod exists; do not wait for Bound before creating it.
-- UID/GID 101 can create/read the file without privileged Pods or chmod 777.
-- Data survives **Pod deletion**, with the same PVC and PV remaining.
-- Describe/events do not show mount, attach, topology or permissions failures.
-- The cleanup behavior matches the backend and reclaim policy.
+Do not change the cluster's default StorageClass for the workshop.
 
-For root-squashed NFS, have the storage team provision the lab directory with
-appropriate UID/GID/ACLs. Do not remove root-squash as a workshop workaround.
-Capacity on an NFS PV is generally a binding/scheduling declaration, not a quota
-unless the backend enforces one.
+What the lab creates in Azure, per learner:
+
+- One **4 GiB Standard SSD managed disk** (`demo-data`), deleted again in Volumes
+  section 5 by the `Delete` reclaim policy.
+- One **5 GiB Azure Files share** (`demo-shared-data`), deleted when the
+  learner's namespace is deleted at the end of the workshop.
+- The Azure Files driver creates or reuses a **storage account** in the node
+  resource group (`MC_...`), tagged `k8s-azure-created-by: azure`. It is shared by
+  all shares and is **not** deleted with the claims; review it after the session.
+
+Requirements and rehearsal points:
+
+- The cluster identity can create disks and storage accounts in the node
+  resource group (the AKS default). Azure Policy or locked resource groups can
+  block this; check events if claims stay `Pending`.
+- Nodes can reach Azure Files over SMB (TCP 445). Restricted egress through a
+  firewall or a storage account firewall/private endpoint needs an explicit rule.
+- Each node VM size has a maximum number of data disks; one small disk per
+  learner is usually far below it.
+- The app runs as UID/GID 101. Azure Disk honors the Pod's `fsGroup: 101`;
+  the built-in Azure Files class mounts SMB shares with permissive file and
+  directory modes. Confirm writes work during the rehearsal.
+
+Rehearse the [Volumes lab](../labs/03-volumes.md) and verify:
+
+- `demo-data` stays `Pending` until the Pod exists (`WaitForFirstConsumer`), then
+  binds; the disk attaches and the file survives Pod replacement.
+- `demo-shared-data` binds immediately; both replicas read and write the same
+  file, ideally on two different nodes.
+- Deleting `demo-data` removes its PV and the managed disk.
+- Describe/events do not show quota, attach, zone, mount or permission failures.
+
+### Running the workshop on AKS on Azure Local instead
+
+AKS on Azure Local does **not** provide `managed-csi` or `azurefile-csi`. Choose
+validated equivalent classes with the platform/storage team, then have learners
+pass them to the workspace helper in the Preparation lab, for example:
+
+```powershell
+.\scripts\New-LabWorkspace.ps1 -Namespace $Namespace -RwoStorageClass '<validated-rwo-class>' -RwxStorageClass '<validated-rwx-class>'
+```
+
+The helper rewrites `storageClassName` in the generated files; the lab commands
+stay the same, but class-specific explanations (Azure disk IDs, storage account,
+binding mode) will differ. Points to validate on Azure Local:
+
+- SAN storage behind Azure Local CSVs and VM disks is a different layer from
+  Pod storage provisioned through CSI; PowerStore/PowerScale hardware does not
+  by itself provide a Kubernetes StorageClass.
+- For array-backed provisioning, follow the Dell CSI for PowerStore/PowerScale
+  documentation and support matrix (moved to Dell.com for CSM 1.17+). Confirm
+  supported transports from the VM workers and NFS export permissions,
+  root-squash and `fsGroup` behavior for UID/GID 101.
+- An RWX class is needed for Volumes section 4 and the CronJob in the Jobs lab.
 
 ## 5. Install the shared operator once
 
@@ -325,13 +358,21 @@ node image-pull access. Shared-controller setup may also require Arc connectivit
 - [ ] Config change appears after rollout; Secret isn't printed or served.
 - [ ] Ingress works, then Gateway/HTTPRoute conditions become Accepted/ResolvedRefs
       and routing works after switching.
-- [ ] RWO claim binds, file is writable and survives Pod recreation.
+- [ ] `managed-csi` disk claim binds after the Pod exists, is writable and survives
+      Pod recreation; deleting it removes the PV and Azure disk.
+- [ ] `azurefile-csi` claim binds immediately; two replicas share the same file.
+- [ ] Jobs complete (`hello`, `parallel-batch` 6/6), `fail-demo` fails with
+      `BackoffLimitExceeded`, the CronJob creates a Job every minute and its
+      report is served through Ingress; suspending stops new Jobs.
 - [ ] Helm upgrade changes content and replica count; rollback restores both.
 - [ ] Certificate Ready, TLS Secret generated, deleting only that demo Secret
       causes the controller to recreate it; HTTPS routes successfully.
-- [ ] Cleanup reviewed: learner deletion does not remove shared controllers/CRDs.
+- [ ] Cleanup reviewed: learner deletion does not remove shared controllers/CRDs;
+      after the session, review the storage account created by the Azure Files driver.
 
-Budget per learner: up to five small app Pods during rollouts, one 1Gi PVC
-(plus optional PVCs), and small API objects. The two-replica Traefik and
-cert-manager installation are shared overhead. Rehearse capacity with the
-expected group size, rather than treating resource requests as actual usage.
+Budget per learner: up to five small app Pods during rollouts, short-lived Job
+Pods (two at a time for the parallel Job, one per minute for the CronJob), one
+4 GiB Azure disk (deleted during the Volumes lab), one 5 GiB Azure Files share
+and small API objects. The two-replica Traefik and cert-manager installation are
+shared overhead. Rehearse capacity with the expected group size, rather than
+treating resource requests as actual usage.

@@ -1,6 +1,6 @@
 # Participant labs: from Docker to Kubernetes
 
-The hands-on workshop is split into **five topic-based guides**. Follow them in
+The hands-on workshop is split into **six topic-based guides**. Follow them in
 order; each guide states its prerequisites and what to leave ready for the next.
 The YAML samples and Helm chart remain in their original locations.
 
@@ -10,8 +10,9 @@ presented a week earlier. Spend about five minutes on the refresher before
 running commands. Each picture has a caption explaining how to read it.
 
 **Audience:** people who know Docker. **Shell:** PowerShell 7.4+.
-**Starting point:** an existing AKS workload cluster on Azure Local, prepared by
-the trainer. No image build or application coding is required.
+**Starting point:** an existing AKS workload cluster, prepared by the trainer.
+The Volumes lab uses the AKS (Azure) built-in storage classes `managed-csi` and
+`azurefile-csi`. No image build or application coding is required.
 
 ## Lab sequence
 
@@ -20,20 +21,22 @@ the trainer. No image build or application coding is required.
 | 0 | [Preparation](labs/00-preparation.md) | 15 | Refresh API objects/scopes, verify tools/context, create a namespace and generate learner-specific files |
 | 1 | [Deployment / Pods / ReplicaSet](labs/01-deployment-pods-replicaset.md) | 50 | Refresh ownership/configuration, deploy, replace/scale Pods, manage ConfigMaps and Secrets |
 | 2 | [Service / Ingress / Gateway API](labs/02-service-ingress-gatewayapi.md) | 50 | Refresh discovery versus routing, create a Service, repair selectors and compare HTTP routing APIs |
-| 3 | [Volumes](labs/03-volumes.md) | 40 | Refresh storage lifecycles, compare emptyDir/PVC, inspect PVs and prove persistence; optional RWX/static NFS |
-| 4 | [Helm](labs/04-helm.md) | 35 | Refresh charts versus releases, assemble/render a chart, install, upgrade, roll back and package |
+| 3 | [Volumes](labs/03-volumes.md) | 45 | Refresh storage lifecycles, compare emptyDir/PVC, persist data on an Azure Disk (`managed-csi`), share it with Azure Files (`azurefile-csi`) and watch the reclaim policy |
+| 4 | [Jobs and CronJobs](labs/04-jobs-cronjobs.md) | 40 | Refresh run-to-completion workloads, run one-off, parallel and failing Jobs, schedule, trigger and suspend a CronJob |
+| 5 | [Helm](labs/05-helm.md) | 35 | Refresh charts versus releases, assemble/render a chart, install, upgrade, roll back and package |
 
 Allow **10 minutes for a break** and **10 minutes for debrief/cleanup** at the end
-of the Helm guide: **210 minutes for the core sequence**, including the
-refreshers. The optional
-[cert-manager operator/CRD extension](labs/04-helm.md#optional-extension-operator-and-crd-with-cert-manager-30-minutes)
-adds 30 minutes, bringing the workshop to **240 minutes**. For a strict four-hour
-slot with discussion, use the core sequence and reserve the operator or storage
-extensions for spare time or a follow-up.
+of the Helm guide: **255 minutes (about 4h15) for the core sequence**, including
+the refreshers. The optional
+[cert-manager operator/CRD extension](labs/05-helm.md#optional-extension-operator-and-crd-with-cert-manager-30-minutes)
+adds 30 minutes (**285 minutes**). This no longer fits a strict half day: run it
+as a full day with discussion time, or as two sessions, for example labs 0-3
+(about 2h40) then labs 4-5 with cleanup and the optional operator extension
+(about 1h30-2h).
 
-ConfigMaps/Secrets stay with the Deployment lab rather than becoming a sixth
-guide. The original operator, TLS, cleanup and troubleshooting exercises are
-preserved in the Helm guide. Optional RWX/static NFS exercises stay with Volumes.
+ConfigMaps/Secrets stay with the Deployment lab. The operator, TLS, cleanup and
+troubleshooting exercises are in the Helm guide. The CronJob in lab 4 writes into
+the Azure Files claim created in lab 3.
 
 ## How to run the labs
 
@@ -44,9 +47,10 @@ preserved in the Helm guide. Optional RWX/static NFS exercises stay with Volumes
   Preparation sets the shared variables; Networking adds `$IngressIp`.
 - Use a second terminal for port-forwarding. Stop tunnels with Ctrl+C.
 - Follow the file-by-file instructions. **Do not apply the manifests recursively**:
-  they include alternative routing/storage paths and deployment patches.
+  they include alternative routing paths and deployment patches.
 - Keep previous labs' objects until final cleanup. Deleting a namespace also
-  deletes its PVCs and may destroy backend storage.
+  deletes its PVCs, and with `managed-csi`/`azurefile-csi` their Azure disks and
+  file shares.
 - Use synthetic content only; never put credentials or sensitive data in the
   served page or public data directory.
 - Stop at unexpected failures. PowerShell does not automatically stop for a
